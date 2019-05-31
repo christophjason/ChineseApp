@@ -1,30 +1,40 @@
 package com.example.loginapp.Activities.Model;
 
 public class Conversation {
-    public String Chinese_conversation;
-    public String english_words1;
+    public String chinese_conversation;
+    public String conversation_voice;
+    public String english_conversation;
 
     public Conversation(){
-
     }
 
-    public Conversation (String Chinese_conversation,String english_words1) {
-        this.Chinese_conversation = Chinese_conversation;
-        this.english_words1 = english_words1;
-
+    public Conversation(String chinese_conversation, String conversation_voice, String english_conversation) {
+        this.chinese_conversation = chinese_conversation;
+        this.conversation_voice = conversation_voice;
+        this.english_conversation = english_conversation;
     }
+
     public String getChinese_conversation() {
-        return Chinese_conversation;
+        return chinese_conversation;
     }
 
-    public void setChinese_conversation(String chinese_conversation) { this.Chinese_conversation = Chinese_conversation;
+    public void setChinese_conversation(String chinese_conversation) {
+        this.chinese_conversation = chinese_conversation;
     }
 
-    public String getEnglish_words1() {
-        return getEnglish_words1();
+    public String getConversation_voice() {
+        return conversation_voice;
     }
 
-    public void setEnglish_words1(String english_words1) {
-        this.english_words1 = english_words1;
+    public void setConversation_voice(String conversation_voice) {
+        this.conversation_voice = conversation_voice;
+    }
+
+    public String getEnglish_conversation() {
+        return english_conversation;
+    }
+
+    public void setEnglish_conversation(String english_conversation) {
+        this.english_conversation = english_conversation;
     }
 }

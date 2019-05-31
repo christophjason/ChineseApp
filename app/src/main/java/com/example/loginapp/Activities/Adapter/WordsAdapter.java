@@ -29,7 +29,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.ViewHolder> 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.lesson_name, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.wordlist, viewGroup, false);
         return new ViewHolder(v);
     }
 
@@ -57,7 +57,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.ViewHolder> 
             super(itemView);
             pinyin = itemView.findViewById(R.id.pinyin);
             english = itemView.findViewById(R.id.english);
-            imgWords = itemView.findViewById(R.id.img_words);
+            imgWords = itemView.findViewById(R.id.imgWords);
             lnWord1 = itemView.findViewById(R.id.lnWord1);
         }
 

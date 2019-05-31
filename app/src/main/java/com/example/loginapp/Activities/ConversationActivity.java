@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.loginapp.Activities.Adapter.ConversationAdapter;
+import com.example.loginapp.Activities.Adapter.WordsAdapter;
+import com.example.loginapp.Activities.Model.Conversation;
 import com.example.loginapp.Activities.Model.Lesson;
 import com.example.loginapp.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -28,30 +32,43 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ConversationActivity extends AppCompatActivity {
-    public String receiver_userID;
-    private DatabaseReference lessonRef;
-    private FirebaseAuth mAuth;
-    private RecyclerView list;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    private Toolbar toolbar;
+public class ConversationActivity extends AppCompatActivity {
+    @BindView(R.id.toolbarConv)
+    Toolbar toolbarConv;
+    @BindView(R.id.rv_conversation_list)
+    RecyclerView rv_conversation_list;
+    private String lesson_name;
+
+    private ArrayList<Conversation> conversationList = new ArrayList<>();
+    private ConversationAdapter mAdapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+        ButterKnife.bind(this);
+        getExtrasIntent();
+        setUI();
+    }
 
-        toolbar = (Toolbar) findViewById(R.id.toolbarConv);
-        toolbar.setTitle("Conversation section");
-        toolbar.setTitleTextColor(Color.BLACK);
-        setSupportActionBar(toolbar);
-        mAuth = FirebaseAuth.getInstance();
-        String user_id = mAuth.getCurrentUser().getUid();
+    private void setUI() {
+        toolbarConv.setTitle("Conversation section");
+        toolbarConv.setTitleTextColor(Color.BLACK);
+        setSupportActionBar(toolbarConv);
+        rv_conversation_list.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        rv_conversation_list.setLayoutManager(layoutManager);
+        mAdapter = new WordsAdapter(wordsList, getApplicationContext());
+        rv_words_list.setAdapter(mAdapter);
+        loadWords();
+    }
+
+    private void getExtrasIntent() {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 }

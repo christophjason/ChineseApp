@@ -10,12 +10,14 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.loginapp.Activities.Adapter.WordsAdapter;
 import com.example.loginapp.Activities.Model.Lesson;
@@ -34,6 +36,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,60 +48,54 @@ public class WordsActivity extends AppCompatActivity {
     @BindView(R.id.rv_words_list)
     RecyclerView rv_words_list;
     public String lesson_name;
-    private DatabaseReference wordsRef,lessonRef;
-    private FirebaseAuth mAuth;
-    private Toolbar toolbar;
-    private ImageButton img1,img2,img3,img4;
-    private ImageView imageView1;
-    private RecyclerView list;
-
-    private MediaPlayer mp;
 
     private ArrayList<Words> wordsList = new ArrayList<>();
     private WordsAdapter mAdapter;
-    private String farmId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_words);
         ButterKnife.bind(this);
-        setUI();
         getExtrasIntent();
+        setUI();
     }
 
     private void setUI() {
         toolbarWords.setTitle(lesson_name);
         toolbarWords.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbarWords);
-        list.setHasFixedSize(true);
-        list.setLayoutManager(new GridLayoutManager(this, 2));
-        mAdapter = new WordsAdapter(wordsList, this);
-        list.setAdapter(mAdapter);
+        rv_words_list.setHasFixedSize(true);
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 2, RecyclerView.VERTICAL, false);
+        rv_words_list.setLayoutManager(layoutManager);
+        mAdapter = new WordsAdapter(wordsList, getApplicationContext());
+        rv_words_list.setAdapter(mAdapter);
         loadWords();
     }
 
     private void loadWords() {
         BaseApp.db
                 .collection("lesson")
-                .whereEqualTo("lesson_name", lesson_name)
+                .whereEqualTo("lesson_name", lesson_name.trim())
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
-                    try {
-                        wordsList.clear();
-                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                            String pinyin = documentSnapshot.getData().get("chinese_words").toString();
-                            String english = documentSnapshot.getData().get("english_words").toString();
-                            String img = documentSnapshot.getData().get("words_image").toString();
-                            String audio = documentSnapshot.getData().get("words_voice").toString();
-                            Words word = new Words(pinyin, english, img, audio);
-                            wordsList.add(word);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    } catch (Exception ex) {}
+                    wordsList.clear();
+                    Toast.makeText(this, queryDocumentSnapshots.size()+"", Toast.LENGTH_SHORT).show();
+                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        Map<String, Object> words = (Map<String, Object>) documentSnapshot.getData().get("words");
+                        String pinyin = words.get("chinese_words").toString();
+                        String english = words.get("english_words").toString();
+                        String img = words.get("words_image").toString();
+                        String audio = words.get("words_voice").toString();
+                        Words word = new Words(pinyin, english, img, audio);
+                        Toast.makeText(this, lesson_name, Toast.LENGTH_SHORT).show();
+                        wordsList.add(word);
+                        mAdapter.notifyDataSetChanged();
+                    }
                 });
     }
 
-    private void getExtrasIntent(){
+    private void getExtrasIntent() {
         lesson_name = getIntent().getStringExtra("lesson_name");
+        Toast.makeText(this, lesson_name, Toast.LENGTH_SHORT).show();
     }
 }
