@@ -115,7 +115,6 @@ public class ExerciseActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()){
             case R.id.btn_submit:
                 if(checkTrue){
-                    Toast.makeText(this, "Right Answer", Toast.LENGTH_SHORT).show();
                     successDialog();
                 } else {
                     Toast.makeText(this, "Check on your answers again", Toast.LENGTH_SHORT).show();

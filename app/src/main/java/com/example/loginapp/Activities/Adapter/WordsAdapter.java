@@ -46,7 +46,6 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.ViewHolder> 
         Picasso.get().load(item.getWords_image()).into(viewHolder.imgWords);
         viewHolder.audio.setOnClickListener(v -> {
             MediaPlayer mp = new MediaPlayer();
-            Toast.makeText(mContext, item.getWords_voice(), Toast.LENGTH_SHORT).show();
             try {
                 mp.setDataSource(item.getWords_voice());
                 mp.prepare();

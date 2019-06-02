@@ -84,7 +84,6 @@ public class ConversationActivity extends AppCompatActivity {
                         String english = words.get("english_conversation").toString();
                         String audio = words.get("conversation_voice").toString();
                         Conversation word = new Conversation(pinyin, chinese, audio, english);
-                        Toast.makeText(this, lesson_name, Toast.LENGTH_SHORT).show();
                         conversationList.add(word);
                         mAdapter.notifyDataSetChanged();
                     }

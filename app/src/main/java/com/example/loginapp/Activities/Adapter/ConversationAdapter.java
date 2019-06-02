@@ -43,7 +43,6 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         viewHolder.tv_english.setText(item.getEnglish_conversation());
         viewHolder.audioButton.setOnClickListener(v -> {
             MediaPlayer mp = new MediaPlayer();
-            Toast.makeText(mContext, item.getConversation_voice(), Toast.LENGTH_SHORT).show();
             try {
                 mp.setDataSource(item.getConversation_voice());
                 mp.prepare();

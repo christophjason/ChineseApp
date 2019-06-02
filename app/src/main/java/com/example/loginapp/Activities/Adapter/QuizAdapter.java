@@ -45,25 +45,21 @@ public class QuizAdapter extends RecyclerView.Adapter<QuizAdapter.ViewHolder> {
         viewHolder.rb_answer.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked){
                 ((ExerciseActivity) context).checkTrue = true;
-                Toast.makeText(context, "Right Answer is checked.", Toast.LENGTH_SHORT).show();
             }
         });
         viewHolder.rb_wrong1.setOnCheckedChangeListener(((buttonView, isChecked) -> {
             if(isChecked){
                 ((ExerciseActivity) context).checkTrue = false;
-                Toast.makeText(context, "Wrong Answer is checked.", Toast.LENGTH_SHORT).show();
             }
         }));
         viewHolder.rb_wrong2.setOnCheckedChangeListener(((buttonView, isChecked) -> {
             if(isChecked){
                 ((ExerciseActivity) context).checkTrue = false;
-                Toast.makeText(context, "Wrong Answer is checked.", Toast.LENGTH_SHORT).show();
             }
         }));
         viewHolder.rb_wrong3.setOnCheckedChangeListener(((buttonView, isChecked) -> {
             if(isChecked){
                 ((ExerciseActivity) context).checkTrue = false;
-                Toast.makeText(context, "Wrong Answer is checked.", Toast.LENGTH_SHORT).show();
             }
         }));
     }
