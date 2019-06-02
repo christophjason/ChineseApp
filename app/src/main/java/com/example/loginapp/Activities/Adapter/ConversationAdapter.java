@@ -1,6 +1,7 @@
 package com.example.loginapp.Activities.Adapter;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,11 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.loginapp.Activities.Model.Conversation;
 import com.example.loginapp.Activities.Model.Words;
 import com.example.loginapp.R;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ViewHolder> {
@@ -39,7 +42,15 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         viewHolder.tv_chinese.setText(item.getChinese_conversation());
         viewHolder.tv_english.setText(item.getEnglish_conversation());
         viewHolder.audioButton.setOnClickListener(v -> {
-            //Keluar suara
+            MediaPlayer mp = new MediaPlayer();
+            Toast.makeText(mContext, item.getConversation_voice(), Toast.LENGTH_SHORT).show();
+            try {
+                mp.setDataSource(item.getConversation_voice());
+                mp.prepare();
+                mp.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
