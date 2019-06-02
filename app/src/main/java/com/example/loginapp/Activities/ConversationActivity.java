@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.loginapp.Activities.Adapter.ConversationAdapter;
 import com.example.loginapp.Activities.Adapter.WordsAdapter;
@@ -29,8 +30,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,19 +59,41 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void setUI() {
-        toolbarConv.setTitle("Conversation section");
-        toolbarConv.setTitleTextColor(Color.BLACK);
+        toolbarConv.setTitle(lesson_name + " - Conversation");
+        toolbarConv.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbarConv);
         rv_conversation_list.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         rv_conversation_list.setLayoutManager(layoutManager);
-        mAdapter = new WordsAdapter(wordsList, getApplicationContext());
-        rv_words_list.setAdapter(mAdapter);
-        loadWords();
+        mAdapter = new ConversationAdapter(conversationList, getApplicationContext());
+        rv_conversation_list.setAdapter(mAdapter);
+        loadConv();
+    }
+
+    private void loadConv() {
+        BaseApp.db
+                .collection("lesson")
+                .whereEqualTo("lesson_name", lesson_name.trim())
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    conversationList.clear();
+                    Toast.makeText(this, queryDocumentSnapshots.size()+"", Toast.LENGTH_SHORT).show();
+                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        Map<String, Object> words = (Map<String, Object>) documentSnapshot.getData().get("conversation");
+                        String pinyin = words.get("chinese_conv_pinyin").toString();
+                        String chinese = words.get("chinese_conversation").toString();
+                        String english = words.get("english_conversation").toString();
+                        String audio = words.get("conversation_voice").toString();
+                        Conversation word = new Conversation(pinyin, chinese, audio, english);
+                        Toast.makeText(this, lesson_name, Toast.LENGTH_SHORT).show();
+                        conversationList.add(word);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     private void getExtrasIntent() {
-
+        lesson_name = getIntent().getStringExtra("lesson_name");
+        Toast.makeText(this, lesson_name, Toast.LENGTH_SHORT).show();
     }
 
 }

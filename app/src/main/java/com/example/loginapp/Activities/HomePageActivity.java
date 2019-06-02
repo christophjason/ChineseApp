@@ -65,17 +65,32 @@ public class HomePageActivity extends AppCompatActivity {
         loadLesson();
     }
 
+    private ArrayList<Lesson> check = new ArrayList<>();
+    private boolean isLessonExists = false;
+
     private void loadLesson() {
         BaseApp.db
                 .collection("lesson")
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     try {
                         lessons.clear();
+
                         for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                            isLessonExists = false;
                             String lesson_name = documentSnapshot.getData().get("lesson_name").toString();
                             String lesson_img = documentSnapshot.getData().get("lesson_image").toString();
                             Lesson lesson = new Lesson(lesson_name, lesson_img);
-                            lessons.add(lesson);
+                            //check.add(lesson);
+                            for(Lesson wor : lessons){
+                                if(wor.lesson_name.equals(lesson_name)){
+                                    isLessonExists = true;
+                                    //lessons.add(lesson);
+                                }
+                            }
+
+                            if(!isLessonExists) {
+                                lessons.add(lesson);
+                            }
                             mAdapter.notifyDataSetChanged();
                         }
                     } catch (Exception ex) {}

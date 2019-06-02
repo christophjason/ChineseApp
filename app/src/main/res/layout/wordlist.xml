@@ -11,17 +11,12 @@
         android:orientation="vertical"
         tools:ignore="MissingConstraints">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="136dp"
             android:layout_height="137dp"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/audioButton"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content" />
 
             <ImageView
                 android:id="@+id/imgWords"
@@ -32,7 +27,13 @@
                 android:maxHeight="100dp"
                 android:scaleType="fitXY" />
 
-        </LinearLayout>
+            <ImageButton
+                android:id="@+id/audioButton"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sound"/>
+
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/pinyin"

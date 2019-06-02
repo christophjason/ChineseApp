@@ -23,6 +23,7 @@ import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.features.ReturnMode;
 import com.example.loginapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -55,6 +57,8 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
 
     @BindView(R.id.edtChinese_conversation)
     EditText edtChinese_conversation;
+    @BindView(R.id.edtChinese_conv_pinyin)
+    EditText edtChinese_conv_pinyin;
     @BindView(R.id.edtlesson)
     EditText edtLessonName;
     @BindView(R.id.edtChinesewords)
@@ -67,6 +71,13 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
     EditText edtquestion;
     @BindView(R.id.edtCorrect_answers)
     EditText edtCorrect_answers;
+    @BindView(R.id.edtWrong_answers1)
+    EditText edtWrong_answers1;
+    @BindView(R.id.edtWrong_answers2)
+    EditText edtWrong_answers2;
+    @BindView(R.id.edtWrong_answers3)
+    EditText edtWrong_answers3;
+
     @BindView(R.id.button)
     Button button;
     @BindView(R.id.img_lesson)
@@ -96,12 +107,15 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
         img_voice_word.setOnClickListener(this);
     }
 
-    private void Addlesson(String lesson, String Chinesewords, String englishwords, String Chinese_conversation, String englishwords1, String question, String Correct_answers) {
+    private void Addlesson(String lesson, String Chinesewords, String englishwords, String Chinese_conversation,
+                           String Chinese_conv_pinyin, String englishwords1, String question, String Correct_answers,
+                           String wrong1, String wrong2, String wrong3) {
         if (TextUtils.isEmpty(lesson)) {
             Toast.makeText(getApplicationContext(), "Please write something", Toast.LENGTH_SHORT).show();
         } else {
 
             Map<String, Object> conversation = new HashMap<>();
+            conversation.put("chinese_conv_pinyin", Chinese_conv_pinyin);
             conversation.put("chinese_conversation", Chinese_conversation);
             conversation.put("english_conversation", englishwords1);
             conversation.put("conversation_voice", confVoiceUrl);
@@ -115,6 +129,9 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
             Map<String, Object> questions = new HashMap<>();
             questions.put("questions", question);
             questions.put("answers", Correct_answers);
+            questions.put("wrong1", wrong1);
+            questions.put("wrong2", wrong2);
+            questions.put("wrong3", wrong3);
 
             Map<String, Object> mapLesson = new HashMap<>();
             mapLesson.put("lesson_id", "");
@@ -145,15 +162,19 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                 String lesson = edtLessonName.getText().toString();
                 String Chinesewords = edtChinesewords.getText().toString();
                 String englishwords = edtenglishwords.getText().toString();
+                String Chinese_conv_pinyin = edtChinese_conv_pinyin.getText().toString();
                 String Chinese_conversation = edtChinese_conversation.getText().toString();
                 String englishwords1 = edtenglishwords1.getText().toString();
                 String question = edtquestion.getText().toString();
                 String Correct_answers = edtCorrect_answers.getText().toString();
+                String wrong1 = edtWrong_answers1.getText().toString();
+                String wrong2 = edtWrong_answers2.getText().toString();
+                String wrong3 = edtWrong_answers3.getText().toString();
 
                 progressDialog.setMessage("Create Lesson...");
                 progressDialog.show();
                 progressDialog.setCanceledOnTouchOutside(false);
-                uploadFoto(lesson, Chinesewords, englishwords, Chinese_conversation, englishwords1, question, Correct_answers);
+                uploadFoto(lesson, Chinesewords, englishwords, Chinese_conversation, Chinese_conv_pinyin, englishwords1, question, Correct_answers, wrong1, wrong2, wrong3);
 
                 break;
             case R.id.img_lesson:
@@ -181,13 +202,16 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                 isImageChangeWords = true;
                 break;
             case R.id.img_voice_word:
-                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, 10);
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("audio/mpeg");
+                startActivityForResult(intent, 1);
                 wordVoiceUploaded = true;
                 break;
             case R.id.img_voice_conversation:
-                Intent intent2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent2, 10);
+                Intent intent2 = new Intent(Intent.ACTION_GET_CONTENT);
+                intent2.setType("audio/mpeg");
+                startActivityForResult(intent2, 2);
                 confVoiceUploaded = true;
                 break;
         }
@@ -198,9 +222,9 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
     private String img_uploaded_url = "";
     private String img_uploaded_url2 = "";
     private boolean wordVoiceUploaded = false;
-    String wordVoiceUrl = "";
+    private String wordVoiceUrl = "";
     private boolean confVoiceUploaded = false;
-    String confVoiceUrl = "";
+    private String confVoiceUrl = "";
 
 
     private void uploadVoiceWords(byte[] data, String filename) {
@@ -208,9 +232,24 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                 .setContentType("audio/mpeg")
                 .build();
 
-        StorageReference imagesRef = storageRef.child("lesson/words/"+filename+".3gp");
+        StorageReference imagesRef = storageRef.child("lesson/words/"+filename+".mp4");
         UploadTask uploadTask = imagesRef.putBytes(data, metadata);
+        // Observe state change events such as progress, pause, and resume
         uploadTask.addOnProgressListener(taskSnapshot -> {
+            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+            Toast.makeText(this, "Upload is " + progress + "% done", Toast.LENGTH_SHORT).show();
+        }).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                UploadTask.TaskSnapshot downloadUri = task.getResult();
+                if(downloadUri == null){
+                    return;
+                }
+                wordVoiceUrl = downloadUri.toString();
+            } else {
+                Toast.makeText(this, "Gagal bro", Toast.LENGTH_SHORT).show();
+            }
+        });
+        /*uploadTask.addOnProgressListener(taskSnapshot -> {
             //int progress = (100 * (int)taskSnapshot.getBytesTransferred()) / (int)taskSnapshot.getTotalByteCount();
         }).continueWithTask(task -> {
             if (!task.isSuccessful()) {
@@ -227,7 +266,7 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                 wordVoiceUrl = downloadUri.toString();
                 wordVoiceUploaded = false;
             }
-        });
+        });*/
     }
 
     private void uploadConversationVoice(byte[] data, String filename) {
@@ -238,21 +277,17 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
         StorageReference imagesRef = storageRef.child("lesson/conversation/"+filename+".mp3");
         UploadTask uploadTask = imagesRef.putBytes(data, metadata);
         uploadTask.addOnProgressListener(taskSnapshot -> {
-            //int progress = (100 * (int)taskSnapshot.getBytesTransferred()) / (int)taskSnapshot.getTotalByteCount();
-        }).continueWithTask(task -> {
-            if (!task.isSuccessful()) {
-                throw task.getException();
-            }
-
-            return imagesRef.getDownloadUrl();
+            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+            Toast.makeText(this, "Upload is " + progress + "% done", Toast.LENGTH_SHORT).show();
         }).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Uri downloadUri = task.getResult();
-                if (downloadUri == null)
+            if(task.isSuccessful()){
+                UploadTask.TaskSnapshot downloadUri = task.getResult();
+                if(downloadUri == null){
                     return;
-
+                }
                 confVoiceUrl = downloadUri.toString();
-                confVoiceUploaded = false;
+            } else {
+                Toast.makeText(this, "Gagal bro", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -282,24 +317,39 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
             }
         }
 
-        if(resultCode == RESULT_OK && requestCode == 10){
-            Uri uriSound = data.getData();
-            String path = uriSound.getPath();
-            byte[] fileByteArray;
-            File file = new File(path);
-            fileByteArray = new byte[(int)file.length()];
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                Uri uriSound = data.getData();
+                String path = uriSound.getPath();
+                byte[] fileByteArray;
+                File file = new File(path);
+                fileByteArray = new byte[(int)file.length()];
 
-            if(wordVoiceUploaded) {
-                uploadVoiceWords(fileByteArray, String.valueOf(System.currentTimeMillis()));
-            } else {
-                uploadConversationVoice(fileByteArray, String.valueOf(System.currentTimeMillis()));
+                if(wordVoiceUploaded) {
+                    uploadVoiceWords(fileByteArray, String.valueOf(System.currentTimeMillis()));
+                }
+            }
+        }
+
+        if(requestCode == 2){
+            if(resultCode == RESULT_OK){
+                Uri uriSound = data.getData();
+                String path = uriSound.getPath();
+                byte[] fileByteArray;
+                File file = new File(path);
+                fileByteArray = new byte[(int)file.length()];
+                if(confVoiceUploaded){
+                    uploadConversationVoice(fileByteArray, String.valueOf(System.currentTimeMillis()));
+                }
             }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void uploadFoto(String lesson, String Chinesewords, String englishwords, String Chinese_conversation, String englishwords1, String question, String Correct_answers) {
+    private void uploadFoto(String lesson, String Chinesewords, String englishwords, String Chinese_conversation,
+                            String Chinese_conv_pinyin, String englishwords1, String question, String Correct_answers, String wrong1,
+                            String wrong2, String wrong3) {
         Long tsLong = System.currentTimeMillis() / 1000;
         StorageReference storyImage = storageRef.child("lesson/" + tsLong + ".jpg");
 
@@ -328,14 +378,16 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                     return;
 
                 img_uploaded_url = downloadUri.toString();
-                uploadImageWord(lesson, Chinesewords, englishwords, Chinese_conversation, englishwords1, question, Correct_answers);
+                uploadImageWord(lesson, Chinesewords, englishwords, Chinese_conversation, Chinese_conv_pinyin, englishwords1, question, Correct_answers, wrong1, wrong2, wrong3);
             }
         });
 
 
     }
 
-    private void uploadImageWord(String lesson, String Chinesewords, String englishwords, String Chinese_conversation, String englishwords1, String question, String Correct_answers) {
+    private void uploadImageWord(String lesson, String Chinesewords, String englishwords, String Chinese_conversation,
+                                 String Chinese_conv_pinyin, String englishwords1, String question, String Correct_answers,
+                                 String wrong1, String wrong2, String wrong3) {
         Long tsLong = System.currentTimeMillis() / 1000;
         StorageReference wordsImage = storageRef.child("lesson/words/" + tsLong + ".jpg");
 
@@ -364,7 +416,7 @@ public class AddLessonActivity extends AppCompatActivity implements View.OnClick
                     return;
 
                 img_uploaded_url2 = downloadUri.toString();
-                Addlesson(lesson, Chinesewords, englishwords, Chinese_conversation, englishwords1, question, Correct_answers);
+                Addlesson(lesson, Chinesewords, englishwords, Chinese_conversation, Chinese_conv_pinyin, englishwords1, question, Correct_answers, wrong1, wrong2, wrong3);
             }
         });
     }
